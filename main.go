@@ -8,9 +8,9 @@ import (
 	"log"
 	"net/http"
 	"strings"
-)
 
-// Os tipos e dados de mock foram movidos para mocks.go
+	"sigaa-mock/mocks"
+)
 
 func main() {
 	http.HandleFunc("/login", loginHandler)
@@ -35,7 +35,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	passwordBytes, _ := base64.StdEncoding.DecodeString(passwordB64)
 	password := string(passwordBytes)
 
-	user, ok := scenarios[username]
+	user, ok := mocks.Scenarios[username]
 	if !ok {
 		w.WriteHeader(http.StatusUnauthorized)
 		_, _ = io.WriteString(w, fmt.Sprintf("invalid credentials for %s/%s", username, password))

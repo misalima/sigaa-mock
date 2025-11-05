@@ -1,13 +1,13 @@
-package main
+package mocks
 
-// mocks.go contém os dados de mock separados do handler
+// mocks package contém os dados de mock usados pelo servidor
 
 type User struct {
 	Password string
 	Payload  map[string]interface{}
 }
 
-var scenarios = map[string]User{
+var Scenarios = map[string]User{
 	"cenario1": {
 		Password: "Test1234!",
 		Payload: map[string]interface{}{
@@ -38,7 +38,7 @@ var scenarios = map[string]User{
 			"nome":       "Cenário 3",
 			"email":      "cenario3@mail.com",
 			"cpf":        "205.188.000-08",
-			"perfil":     []string{"docente"},
+			"perfil":     []string{"docente", "discente"},
 		},
 	},
 	"cenario4": {

@@ -59,10 +59,63 @@ curl -i -H "Authorization: Bearer apitoken123" "http://localhost:8080/login?user
 
 Onde editar os mocks
 
-Os dados de mock estão no arquivo `mocks.go` (mesmo pacote). Altere `var scenarios` se quiser modificar ou adicionar usuários.
+Os dados de mock agora estão no pacote `mocks`, dentro da pasta `mocks/mocks.go` (mesmo módulo). O arquivo exporta a variável `Scenarios` do tipo `map[string]mocks.User` — edite esse arquivo para modificar, remover ou adicionar cenários.
 
-Observações
+Exemplo: adicionar um novo usuário (edite `mocks/mocks.go`):
 
-- O mock foi organizado para facilitar edição rápida dos cenários. Não há persistência — é apenas em memória.
-- Se quiser, posso adicionar testes unitários (`main_test.go`) ou alterar para um POST JSON mais realista.
+```go
+// dentro do map Scenarios
+"cenario5": {
+    Password: "NovaSenha!",
+    Payload: map[string]interface{}{
+        "id_usuario": 5,
+        "id_pessoa":  50,
+        "nome":       "Cenário 5",
+        "email":      "cenario5@mail.com",
+        "cpf":        "000.000.000-00",
+        "perfil":     []string{"discente"},
+    },
+},
+```
 
+Depois de editar, rode o servidor normalmente (`go run .` ou `go build` + executar o binário).
+
+Observações finais
+
+- Use `go run .` no diretório do módulo para garantir que todos os pacotes são compilados juntos.
+- Se preferir, movo a documentação de edição para um arquivo `CONTRIBUTING.md` ou acrescento exemplos de testes automáticos.
+
+
+Nota sobre o erro "undefined: scenarios"
+
+Causa
+
+Se você executar `go run main.go` —— sem fornecer os outros arquivos do pacote —— o comando compila apenas `main.go` e não inclui `mocks.go`. Como `scenarios` está definido em `mocks.go`, o compilador reclama de `undefined: scenarios`.
+
+Soluções (PowerShell)
+
+- Recomendo executar o pacote inteiro (inclui todos os arquivos .go do pacote):
+
+```powershell
+Set-Location -LiteralPath 'D:\Projects\Estágio IF\Backend\sigaa-mock'
+go run .
+```
+
+- Alternativa: compilar e executar o binário:
+
+```powershell
+Set-Location -LiteralPath 'D:\Projects\Estágio IF\Backend\sigaa-mock'
+go build -o sigaa-mock.exe
+.\sigaa-mock.exe
+```
+
+- Outra alternativa (incluir manualmente os arquivos ao rodar):
+
+```powershell
+cd 'D:\Projects\Estágio IF\Backend\sigaa-mock'
+go run main.go mocks.go
+```
+
+Por que usar `go run .`?
+
+Ele garante que todos os arquivos do pacote atual são compilados juntos, evitando erros onde símbolos definidos em outros arquivos do pacote (como `scenarios`) não são encontrados.
