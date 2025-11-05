@@ -7,7 +7,10 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strings"
 )
+
+// Os tipos e dados de mock foram movidos para mocks.go
 
 func main() {
 	http.HandleFunc("/login", loginHandler)
@@ -16,7 +19,6 @@ func main() {
 }
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
-	// simples check do Authorization header (Bearer <token>)
 	auth := r.Header.Get("Authorization")
 	if auth != "Bearer apitoken123" {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -26,26 +28,26 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 
 	q := r.URL.Query()
 	username := q.Get("username")
+	if at := strings.Index(username, "@"); at != -1 {
+		username = username[:at]
+	}
 	passwordB64 := q.Get("password")
 	passwordBytes, _ := base64.StdEncoding.DecodeString(passwordB64)
 	password := string(passwordBytes)
 
-	// logic example: se username/password batem, retorna 201 com payload
-	if username == "jose" && password == "Test1234!" {
-		w.WriteHeader(http.StatusCreated)
-		payload := map[string]interface{}{
-			"id_usuario": 1,
-			"id_pessoa":  10,
-			"nome":       "José",
-			"email":      "jose@example.com",
-			"cpf":        "12345678900",
-			"perfil":     []string{"docente", "discente"},
-		}
-		_ = json.NewEncoder(w).Encode(payload)
+	user, ok := scenarios[username]
+	if !ok {
+		w.WriteHeader(http.StatusUnauthorized)
+		_, _ = io.WriteString(w, fmt.Sprintf("invalid credentials for %s/%s", username, password))
 		return
 	}
 
-	// caso padrão: 401 com corpo
-	w.WriteHeader(http.StatusUnauthorized)
-	_, _ = io.WriteString(w, fmt.Sprintf("invalid credentials for %s/%s", username, password))
+	if password != user.Password {
+		w.WriteHeader(http.StatusUnauthorized)
+		_, _ = io.WriteString(w, fmt.Sprintf("invalid credentials for %s/%s", username, password))
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	_ = json.NewEncoder(w).Encode(user.Payload)
 }
